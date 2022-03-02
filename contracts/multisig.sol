@@ -3,7 +3,7 @@
 pragma solidity ^0.8.0;
 
 contract MultiSig {
-  event TransactionCreated(address creator, address to, uint value, uint txId);
+  event TransactionCreated(address indexed creator, address indexed to, uint value, uint txId);
   event TransactionConfirmed(uint txId, address member, uint currentConfirmations);
   event TransactionExecuted(uint txId);
 
@@ -33,12 +33,14 @@ contract MultiSig {
 
   // Check if member has confirmed transaction or not
   modifier notConfirmed(uint _txId) {
+    require(_txId < nextTxId, "Transaction does not exist.")
     require(!confirmedByMember[_txId][msg.sender], "You have already confirmed the transaction.");
     _;
   }
 
   // Check if transaction is executed or not
   modifier inProgress(uint _txId) {
+    require(_txId < nextTxId, "Transaction does not exist.")
     require(!idToTx[_txId].executed, "Transaction has already been executed.");
     _;
   }
@@ -56,5 +58,18 @@ contract MultiSig {
     }
   }
 
-  
+  // Receive ether
+  fallback() external payable {}
+
+  function createTransaction(address _to, uint _value) onlyOwner external {
+    // Save id to memory for multiple accesses to save gas
+    uint txId = nextTxId;
+
+    Transaction storage tx = Transaction(msg.sender, _to, _value, 1, false);
+    idToTx[txId] = tx;
+    confirmedByMember[txId][msg.sender] = true;
+    nextTxId++;
+
+    emit TransactionCreated(msg.sender, _to, _value, txId);
+  }
 }

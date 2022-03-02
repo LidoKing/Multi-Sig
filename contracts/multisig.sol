@@ -70,7 +70,7 @@ contract MultiSig {
     // Save id to memory for multiple accesses to save gas
     uint txId = nextTxId;
 
-    Transaction storage _tx = Transaction(msg.sender, _to, _value, 1, false);
+    Transaction memory _tx = Transaction(msg.sender, _to, _value, 1, false);
     idToTx[txId] = _tx;
     confirmedByMember[txId][msg.sender] = true;
     nextTxId++;

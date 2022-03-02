@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: ISC
+
 pragma solidity ^0.8.0;
 
 contract MultiSig {
@@ -8,11 +10,11 @@ contract MultiSig {
   uint requiredConfirmations = 3;
 
   struct Transaction {
-    address initiator,
-    address to,
-    uint value,
-    uint confirmations,
-    bool executed
+    address initiator;
+    address to;
+    uint value;
+    uint confirmations;
+    bool executed;
   }
 
   mapping(uint => Transaction) idToTx;
@@ -38,17 +40,19 @@ contract MultiSig {
   }
 
   constructor(address[5] memory _members) {
-    require(_members.length == 5, "Insufficient members to form group.")
+    require(_members.length == 5, "Insufficient members to form group.");
 
-    for (uint i = 0, i < 5, i++) {
-      require(member != address(0), "Invalid address of member.");
-      require(!isMember[owner], "Member not unique.");
-
+    for (uint i = 0; i < 5; i++) {
       address member = _members[i];
+      require(member != address(0), "Invalid address of member.");
+      require(!isMember[member], "Member not unique.");
+
       members[i] = member;
       isMember[member] = true;
     }
   }
 
-
+  /*function createTransaction(address to) onlyOwner external {
+    Transaction storage tx = Transaction(msg.sender, msg.value, , 0, false);
+  }*/
 }

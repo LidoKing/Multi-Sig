@@ -34,6 +34,7 @@ contract MultiSig {
   // Check if transaction is executed or not
   modifier inProgress(uint _txId) {
     require(!idToTx[_txId].executed, "Transaction has already been executed.");
+    _;
   }
 
   constructor(address[5] memory _members) {

@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 contract MultiSig {
   event TransactionCreated(address indexed creator, address indexed to, uint value, uint txId);
-  event TransactionConfirmed(uint txId, address member, uint currentConfirmations);
+  event TransactionConfirmed(uint txId, address by, uint currentConfirmations);
   event TransactionExecuted(uint txId);
 
   address[5] public members;
@@ -33,20 +33,21 @@ contract MultiSig {
 
   // Check if member has confirmed transaction or not
   modifier notConfirmed(uint _txId) {
-    require(_txId < nextTxId, "Transaction does not exist.")
+    require(_txId < nextTxId, "Transaction does not exist.");
     require(!confirmedByMember[_txId][msg.sender], "You have already confirmed the transaction.");
     _;
   }
 
   // Check if transaction is executed or not
   modifier inProgress(uint _txId) {
-    require(_txId < nextTxId, "Transaction does not exist.")
+    require(_txId < nextTxId, "Transaction does not exist.");
     require(!idToTx[_txId].executed, "Transaction has already been executed.");
     _;
   }
 
   modifier hasEnoughConfirmations(uint _txId) {
-    require(idToTx[_txId].confirmations >= 3, "Not enough confirmations.")
+    require(idToTx[_txId].confirmations >= 3, "Not enough confirmations.");
+    _;
   }
 
   constructor(address[5] memory _members) {
@@ -77,5 +78,5 @@ contract MultiSig {
     emit TransactionCreated(msg.sender, _to, _value, txId);
   }
 
-  function confirmTransaction(uint _txId) onlyOwner notConfirmed
+  
 }

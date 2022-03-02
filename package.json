@@ -18,11 +18,13 @@
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-truffle5": "^2.0.5",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@nomiclabs/hardhat-web3": "^2.0.0",
     "chai": "^4.3.6",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.4",
     "hardhat": "^2.9.0",
     "hardhat-gas-reporter": "^1.0.8",
-    "hardhat-spdx-license-identifier": "^2.0.3"
+    "hardhat-spdx-license-identifier": "^2.0.3",
+    "web3": "^1.7.0"
   }
 }

@@ -17,21 +17,33 @@ contract MultiSig {
 
   mapping(uint => Transaction) idToTx;
   mapping(address => bool) public isMember;
+  // Check if member has confirmed transaction or not
+  mapping(uint => mapping(address => bool)) confirmedByMember;
+
+  modifier onlyOwner() {
+    require(isMember[msg.sender], "Not a member.");
+    _;
+  }
+
+  modifier notConfirmed(uint _txId) {
+    require(!confirmedByMember[_txId][msg.sender], "You have already confirmed the transaction.");
+    _;
+  }
+
+  modifier inProgress(uint _txId) {
+    require(!idToTx[_txId].executed, "Transaction has already been executed.");
+  }
 
   constructor(address[5] memory _members) {
     require(_members.length == 5, "Insufficient members to form group.")
 
     for (uint i = 0, i < 5, i++) {
       require(member != address(0), "Invalid address of member.");
-      require(!isMember[owner], "Member not unique");
+      require(!isMember[owner], "Member not unique.");
 
       address member = _members[i];
       members[i] = member;
       isMember[member] = true;
     }
-  }
-
-  function createTransaction(address _to) onlyOwner external {
-
   }
 }

@@ -64,7 +64,7 @@ contract MultiSig {
   }
 
   // Receive ether
-  fallback() external payable {}
+  receive() external payable {}
 
   function createTransaction(address _to, uint _value) onlyOwner external {
     // Save id to memory for multiple accesses to save gas

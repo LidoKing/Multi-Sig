@@ -45,6 +45,10 @@ contract MultiSig {
     _;
   }
 
+  modifier hasEnoughConfirmations(uint _txId) {
+    require(idToTx[_txId].confirmations >= 3, "Not enough confirmations.")
+  }
+
   constructor(address[5] memory _members) {
     require(_members.length == 5, "Insufficient members to form group.");
 
@@ -72,4 +76,6 @@ contract MultiSig {
 
     emit TransactionCreated(msg.sender, _to, _value, txId);
   }
+
+  function confirmTransaction(uint _txId) onlyOwner notConfirmed
 }

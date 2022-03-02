@@ -17,19 +17,21 @@ contract MultiSig {
 
   mapping(uint => Transaction) idToTx;
   mapping(address => bool) public isMember;
-  // Check if member has confirmed transaction or not
   mapping(uint => mapping(address => bool)) confirmedByMember;
 
+  // Check if function caller is member of the group
   modifier onlyOwner() {
     require(isMember[msg.sender], "Not a member.");
     _;
   }
 
+  // Check if member has confirmed transaction or not
   modifier notConfirmed(uint _txId) {
     require(!confirmedByMember[_txId][msg.sender], "You have already confirmed the transaction.");
     _;
   }
 
+  // Check if transaction is executed or not
   modifier inProgress(uint _txId) {
     require(!idToTx[_txId].executed, "Transaction has already been executed.");
   }
@@ -46,4 +48,6 @@ contract MultiSig {
       isMember[member] = true;
     }
   }
+
+
 }

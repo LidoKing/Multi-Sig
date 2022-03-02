@@ -74,6 +74,7 @@ contract MultiSig {
   }
 
   function createTransaction(address _to, uint _value) onlyOwner external {
+    require(address(this).balance >= _value, "Not enough money in wallet.");
     // Save id to memory for multiple accesses to save gas
     uint txId = nextTxId;
 
@@ -112,5 +113,9 @@ contract MultiSig {
     confirmedByMember[_txId][msg.sender] = false;
 
     emit ConfirmationRevoked(_txId, msg.sender);
+  }
+
+  function checkMember(address _address) public view returns (bool) {
+    return isMember[_address];
   }
 }

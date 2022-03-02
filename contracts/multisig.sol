@@ -14,6 +14,9 @@ contract MultiSig {
   // no need to use uint8 as there are no other variables for packing
   uint requiredConfirmations = 3;
 
+  // Re-entrancy guard
+  bool locked;
+
   struct Transaction {
     address creator;
     address to;
@@ -89,5 +92,16 @@ contract MultiSig {
     emit TransactionConfirmed(_txId, msg.sender, _tx.confirmations);
   }
 
-  
+  function executeTransaction(uint _txId) onlyOwner hasEnoughConfirmations(_txId) external {
+    require(!locked, "Re-entrancy detected.");
+    locked = true;
+    Transaction storage _tx = idToTx[_txId];
+    address receiver = _tx.to;
+    (bool status, ) = receiver.call{value: _tx.value}("");
+    require(status, "Transaction failed.");
+    _tx.executed = true;
+
+    emit TransactionExecuted(_txId);
+    locked = false;
+  }
 }

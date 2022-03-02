@@ -6,6 +6,7 @@ contract MultiSig {
   event TransactionCreated(address indexed creator, address indexed to, uint value, uint txId);
   event TransactionConfirmed(uint txId, address by, uint currentConfirmations);
   event TransactionExecuted(uint txId);
+  event DepositReceived(uint contractBalance);
 
   address[5] public members;
 
@@ -46,7 +47,7 @@ contract MultiSig {
   }
 
   modifier hasEnoughConfirmations(uint _txId) {
-    require(idToTx[_txId].confirmations >= 3, "Not enough confirmations.");
+    require(idToTx[_txId].confirmations >= requiredConfirmations, "Not enough confirmations.");
     _;
   }
 
@@ -64,7 +65,9 @@ contract MultiSig {
   }
 
   // Receive ether
-  receive() external payable {}
+  receive() external payable {
+    emit DepositReceived(address(this).balance);
+  }
 
   function createTransaction(address _to, uint _value) onlyOwner external {
     // Save id to memory for multiple accesses to save gas
@@ -85,4 +88,6 @@ contract MultiSig {
 
     emit TransactionConfirmed(_txId, msg.sender, _tx.confirmations);
   }
+
+  
 }

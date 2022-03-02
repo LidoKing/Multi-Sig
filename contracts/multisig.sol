@@ -80,9 +80,9 @@ contract MultiSig {
 
   function confirmTransaction(uint _txId) onlyOwner notConfirmed(_txId) inProgress(_txId) external {
     Transaction storage _tx = idToTx[_txId];
-    tx.confirmations++;
+    _tx.confirmations++;
     confirmedByMember[_txId][msg.sender] = true;
 
-    emit TransactionConfirmed(_txId, msg.sender, tx.confirmations);
+    emit TransactionConfirmed(_txId, msg.sender, _tx.confirmations);
   }
 }

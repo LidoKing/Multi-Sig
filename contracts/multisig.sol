@@ -19,8 +19,19 @@ contract MultiSig {
   mapping(address => bool) public isMember;
 
   constructor(address[5] memory _members) {
+    require(_members.length == 5, "Insufficient members to form group.")
+
     for (uint i = 0, i < 5, i++) {
-      members[i] = _members[i];
+      require(member != address(0), "Invalid address of member.");
+      require(!isMember[owner], "Member not unique");
+
+      address member = _members[i];
+      members[i] = member;
+      isMember[member] = true;
     }
+  }
+
+  function createTransaction(address _to) onlyOwner external {
+
   }
 }

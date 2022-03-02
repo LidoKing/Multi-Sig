@@ -3,14 +3,18 @@
 pragma solidity ^0.8.0;
 
 contract MultiSig {
+  event TransactionCreated(address creator, address to, uint value, uint txId);
+  event TransactionConfirmed(uint txId, address member, uint currentConfirmations);
+  event TransactionExecuted(uint txId);
+
   address[5] public members;
 
-  uint[] txIds;
+  uint nextTxId;
   // no need to use uint8 as there are no other variables for packing
   uint requiredConfirmations = 3;
 
   struct Transaction {
-    address initiator;
+    address creator;
     address to;
     uint value;
     uint confirmations;
@@ -52,7 +56,5 @@ contract MultiSig {
     }
   }
 
-  /*function createTransaction(address to) onlyOwner external {
-    Transaction storage tx = Transaction(msg.sender, msg.value, , 0, false);
-  }*/
+  
 }

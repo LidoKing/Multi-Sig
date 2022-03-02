@@ -6,6 +6,7 @@ contract MultiSig {
   event TransactionCreated(address indexed creator, address indexed to, uint value, uint txId);
   event TransactionConfirmed(uint txId, address by, uint currentConfirmations);
   event TransactionExecuted(uint txId);
+  event ConfirmationRevoked(uint txId, address by);
   event DepositReceived(uint contractBalance);
 
   address[5] public members;
@@ -103,5 +104,13 @@ contract MultiSig {
 
     emit TransactionExecuted(_txId);
     locked = false;
+  }
+
+  function revokeConfirmation(uint _txId) onlyOwner inProgress(_txId) external {
+    Transaction storage _tx = idToTx[_txId];
+    _tx.confirmations--;
+    confirmedByMember[_txId][msg.sender] = false;
+
+    emit ConfirmationRevoked(_txId, msg.sender);
   }
 }

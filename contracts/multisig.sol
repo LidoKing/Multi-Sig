@@ -77,7 +77,7 @@ contract MultiSig {
     emit DepositReceived(address(this).balance);
   }
 
-  function createTransaction(address _to, uint _value) onlyOwner external {
+  function createTransaction(address _to, uint _value) onlyOwner external returns (uint) {
     require(address(this).balance >= _value, "Not enough money in wallet.");
     // Save id to memory for multiple accesses to save gas
     uint txId = nextTxId;
@@ -88,6 +88,8 @@ contract MultiSig {
     nextTxId++;
 
     emit TransactionCreated(msg.sender, _to, _value, txId);
+
+    return txId;
   }
 
   function confirmTransaction(uint _txId) onlyOwner notConfirmed(_txId) inProgress(_txId) external {

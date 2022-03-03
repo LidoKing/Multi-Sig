@@ -73,6 +73,10 @@ contract MultiSig {
     emit DepositReceived(address(this).balance);
   }
 
+  fallback() external payable {
+    emit DepositReceived(address(this).balance);
+  }
+
   function createTransaction(address _to, uint _value) onlyOwner external {
     require(address(this).balance >= _value, "Not enough money in wallet.");
     // Save id to memory for multiple accesses to save gas

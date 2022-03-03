@@ -78,7 +78,8 @@ contract MultiSig {
   }
 
   function createTransaction(address _to, uint _value) onlyOwner external returns (uint) {
-    require(address(this).balance >= _value, "Not enough money in wallet.");
+    uint contractBalance = address(this).balance;
+    require(contractBalance / 10 ** 18 >= _value, "Not enough money in wallet.");
     // Save id to memory for multiple accesses to save gas
     uint txId = nextTxId;
 

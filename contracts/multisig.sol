@@ -43,6 +43,12 @@ contract MultiSig {
     _;
   }
 
+  modifier confirmed(uint _txId) {
+    require(_txId < nextTxId, "Transaction does not exist.");
+    require(confirmedByMember[_txId][msg.sender], "You never confirmed the transaction.");
+    _;
+  }
+
   // Check if transaction is executed or not
   modifier inProgress(uint _txId) {
     require(_txId < nextTxId, "Transaction does not exist.");
@@ -114,7 +120,7 @@ contract MultiSig {
     locked = false;
   }
 
-  function revokeConfirmation(uint _txId) onlyOwner inProgress(_txId) external {
+  function revokeConfirmation(uint _txId) onlyOwner inProgress(_txId) confirmed(_txId) external {
     Transaction storage _tx = idToTx[_txId];
     _tx.confirmations--;
     confirmedByMember[_txId][msg.sender] = false;

@@ -21,7 +21,7 @@ contract MultiSig {
   struct Transaction {
     address creator;
     address to;
-    uint value;
+    uint value; // in ETH
     uint confirmations;
     bool executed;
   }
@@ -121,5 +121,10 @@ contract MultiSig {
 
   function checkMember(address _address) public view returns (bool) {
     return isMember[_address];
+  }
+
+  function getTransaction(uint _txId) public view returns (Transaction memory) {
+    require(_txId < nextTxId, "Transaction does not exist");
+    return idToTx[_txId];
   }
 }

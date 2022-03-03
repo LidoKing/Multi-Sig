@@ -151,10 +151,12 @@ describe("MultiSig", function () {
 
     // Execute tx
     await multisig.connect(signer1).executeTransaction(id);
+    let tx = await multisig.getTransaction(id);
     let contractBalance = await balance(multisig.address);
     let addr6Balance = await balance(addr6);
     expect(contractBalance).to.equal("10.0");
     expect(addr6Balance).to.equal("10010.0");
+    expect(tx.executed).to.equal(true);
   });
 
   it("should not execute transaction with insufficient confirmations", async () => {
@@ -172,4 +174,6 @@ describe("MultiSig", function () {
     // Execute tx
     await utils.shouldThrow(multisig.connect(signer1).executeTransaction(id));
   });
+
+  it("should ");
 });

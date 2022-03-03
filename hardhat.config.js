@@ -47,10 +47,9 @@ module.exports = {
     currency: "USD",
     coinmarketcap: "3c9160b9-382c-48bd-8873-b0936d7a914d",
     // gasPrice: ,
-    token: "MATIC",
-    gasPriceApi: "https://api.polygonscan.com/api?module=proxy&action=eth_gasPrice",
+    token: "ETH",
+    gasPriceApi: "https://api.etherscan.io/api?module=proxy&action=eth_gasPrice",
     // outputFile: stdout,
     noColors: false,
-    excludeContracts: ['Greeter']
   }
 };

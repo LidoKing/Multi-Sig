@@ -1,8 +1,14 @@
 const { expect } = require("chai");
+const { MockProvider } = require("ethereum-waffle");
 const { ethers, waffle } = require("hardhat");
+const {loadFixture, deployContract} = waffle;
+const MultiSig = require("../artifacts/contracts/multisig.sol/MultiSig.json");
+
 /*const Web3 = require("web3");
-const web3 = new Web3('ws://127.0.0.1:8545/');*/
+const web3 = new Web3('ws://127.0.0.1:8545/');
 const MultiSig = artifacts.require("MultiSig");
+*/
+
 /*
 contract("MultiSig", (accounts) => {
   let [ac1, ac2, ac3, ac4, ac5, ac6] = accounts;
@@ -32,7 +38,7 @@ contract("MultiSig", (accounts) => {
 */
 
 describe("MultiSig", function () {
-  let instance;
+  /*let instance;
 
   before(async () => {
     this.MultiSig = await ethers.getContractFactory("MultiSig");
@@ -44,14 +50,24 @@ describe("MultiSig", function () {
     this.multisig = await this.MultiSig.deploy([addr1, addr2, addr3, addr4, addr5]);
     await this.multisig.deployed();
     instance  = this.multisig;
-  });
+  });*/
+
+  async function fixture(_wallets, _mockProvider) {
+    const [signer1, signer2, signer3, signer4, signer5, signer6] = await ethers.getSigners();
+    const addr = [signer1.address, signer2.address, signer3.address, signer4.address, signer5.address, signer6.address];
+    let multisig = await deployContract(signer1, MultiSig, [[addr[0], addr[1], addr[2], addr[3], addr[4]]]);
+    return {multisig, addr};
+  }
 
   it("should deploy with five members", async () => {
-    expect(await instance.checkMember(addr1)).to.equal(true);
-    expect(await instance.checkMember(addr2)).to.equal(true);
-    expect(await instance.checkMember(addr3)).to.equal(true);
-    expect(await instance.checkMember(addr4)).to.equal(true);
-    expect(await instance.checkMember(addr5)).to.equal(true);
-    expect(await instance.checkMember(addr6)).to.equal(false);
+    const {multisig, addr} = await loadFixture(fixture);
+    console.log(multisig);
+
+    expect(await multisig.checkMember(addr[0])).to.equal(true);
+    expect(await multisig.checkMember(addr[1])).to.equal(true);
+    expect(await multisig.checkMember(addr[2])).to.equal(true);
+    expect(await multisig.checkMember(addr[3])).to.equal(true);
+    expect(await multisig.checkMember(addr[4])).to.equal(true);
+    expect(await multisig.checkMember(addr[5])).to.equal(false);
   });
 });

@@ -112,7 +112,8 @@ contract MultiSig {
     locked = true;
     Transaction storage _tx = idToTx[_txId];
     address receiver = _tx.to;
-    (bool status, ) = receiver.call{value: _tx.value}("");
+    uint amount = _tx.value;
+    (bool status, ) = receiver.call{value: amount * 10 ** 18}("");
     require(status, "Transaction failed.");
     _tx.executed = true;
 

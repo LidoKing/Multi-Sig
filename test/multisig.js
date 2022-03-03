@@ -54,14 +54,14 @@ describe("MultiSig", function () {
 
   async function fixture(_wallets, _mockProvider) {
     const [signer1, signer2, signer3, signer4, signer5, signer6] = await ethers.getSigners();
+    const signers = [signer1, signer2, signer3, signer4, signer5, signer6];
     const addr = [signer1.address, signer2.address, signer3.address, signer4.address, signer5.address, signer6.address];
     let multisig = await deployContract(signer1, MultiSig, [[addr[0], addr[1], addr[2], addr[3], addr[4]]]);
-    return {multisig, addr};
+    return {multisig, addr, signers};
   }
 
   it("should deploy with five members", async () => {
-    const {multisig, addr} = await loadFixture(fixture);
-    console.log(multisig);
+    const {multisig, addr, signers} = await loadFixture(fixture);
 
     expect(await multisig.checkMember(addr[0])).to.equal(true);
     expect(await multisig.checkMember(addr[1])).to.equal(true);
@@ -69,5 +69,17 @@ describe("MultiSig", function () {
     expect(await multisig.checkMember(addr[3])).to.equal(true);
     expect(await multisig.checkMember(addr[4])).to.equal(true);
     expect(await multisig.checkMember(addr[5])).to.equal(false);
+  });
+
+  it("should receive deposits", async () => {
+    const {multisig, addr, signers} = await loadFixture(fixture);
+
+    let amount = await ethers.utils.parseEther("20");
+    await signers[5].sendTransaction({from: addr[5], to: multisig.address, value: amount});
+    let contractBalance = await ethers.provider.getBalance(multisig.address);
+    expect(contractBalance).to.equal(amount);
+    // New balance of addr[5] after depositing
+    let addrBalance = await ethers.provider.getBalance(addr[5]);
+    console.log(await ethers.utils.formatEther(addrBalance));
   });
 });

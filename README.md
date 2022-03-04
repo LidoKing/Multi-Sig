@@ -53,16 +53,28 @@ Members can revote confirmation on a transaction at anytime as long as it has no
 ### Reject transaction
 
 Transaction is rejected once there are 3 rejections recorded. Rejections, unlike confirmations, cannot be revoked.
-Checks if rejection threshold has been reached and changes transaction state automatically:
-
-```shell
-"if (_tx.rejections >= threshold) {
-  _tx.rejected = true;
-}"
-```
+Function checks if rejection threshold has been reached at the end of every call and changes transaction state automatically.
 
 ### Execute transaction
 
+Transaction execution is done manually. State variable "locked" is changed to true immediately after function is called to prevent re-entrancy, unlocks after transaction has finished.
+
+```shell
+  bool locked;
+
+function executeTransaction(uint _txId) onlyOwner enoughConfirmations(_txId) enoughBalance(_txId) hasTx(_txId) external {
+  require(!locked, "Re-entrancy detected.");
+  locked = true;
+  Transaction storage _tx = idToTx[_txId];
+  address recepient = _tx.to;
+  (bool status, ) = recepient.call{value: _tx.value}("");
+  require(status, "Transaction failed.");
+  _tx.executed = true;
+  locked = false;
+
+  emit TransactionExecuted(_txId);
+}
+```
 
 ## Installation
 

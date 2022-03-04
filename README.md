@@ -23,7 +23,7 @@ struct Transaction {
 }
 ```
 
-Transaction can be created by any members tracked by state txId variable that increments for each transaction created
+Transaction is tracked by state txId variable that increments for each transaction created
 
 ```shell
 uint nextTxId;
@@ -37,12 +37,29 @@ mapping(uint => Transaction) idToTx;
 
 ### Confirm transaction
 
+Members' vote on transaction is tracked by nested mappings
+
+```shell
+mapping(uint => mapping(address => bool)) confirmedByMember;
+mapping(uint => mapping(address => bool)) rejectedByMember;
+```
+
+which are used in modifiers
 
 ### Revoke confirmation
 
+Members can revote confirmation on a transaction at anytime as long as it has not yet been executed.
 
 ### Reject transaction
 
+Transaction is rejected once there are 3 rejections recorded. Rejections, unlike confirmations, cannot be revoked.
+Checks if rejection threshold has been reached and changes transaction state automatically:
+
+```shell
+if (_tx.rejections >= threshold) {
+  _tx.rejected = true;
+}
+```
 
 ### Execute transaction
 

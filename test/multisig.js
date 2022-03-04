@@ -63,7 +63,7 @@ describe("MultiSig", function () {
       let result = await multisig.connect(signer1).createTransaction(addr6, 10);
       let id = result.value.toNumber();
       let tx = await multisig.getTransaction(id);
-      expect(tx.creator).to.equal(addr1);
+      expect(tx.confirmations).to.equal("1");
     });
   });
 

@@ -20,7 +20,6 @@ contract MultiSig {
   bool locked;
 
   struct Transaction {
-    address creator;
     address to;
     uint value; // in ETH
     uint confirmations;

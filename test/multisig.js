@@ -198,4 +198,40 @@ describe("MultiSig", function () {
     await utils.shouldThrow(multisig.connect(signer2).rejectTransaction(id));
   });
 
+  it("should simulate real situation", async () => {
+    const {multisig, signer1, signer2, signer3, signer4, signer5, signer6, addr1, addr2, addr6} = await loadFixture(fixture);
+
+    // Member1 deposit to contract
+    let amount = await ethers.utils.parseEther("100"); // eth to wei
+    await signer1.sendTransaction({from: addr1, to: multisig.address, value: amount});
+
+    // Member1 creates tx1
+    let tx1idBN = await multisig.callStatic.createTransaction(addr6, 10); // pretend execution and get function return value
+    let tx1id = tx1idBN.toNumber();
+    await multisig.connect(signer1).createTransaction(addr6, 10);
+    // Member2 confirms tx1
+    await multisig.connect(signer2).confirmTransaction(tx1id);
+    // Member2 creates tx2
+    let tx2idBN = await multisig.callStatic.createTransaction(addr2, 50); // pretend execution and get function return value
+    let tx2id = tx2idBN.toNumber();
+    await multisig.connect(signer2).createTransaction(addr2, 50);
+    // Some random guy (signer6) tries to confirm tx2
+    await utils.shouldThrow(multisig.connect(signer6).confirmTransaction(tx2id));
+    // Member2 revokes tx1
+    await multisig.connect(signer2).revokeConfirmation(tx1id);
+    // Member3 confirms tx1 and rejects tx2
+    await multisig.connect(signer3).confirmTransaction(tx1id);
+    await multisig.connect(signer3).rejectTransaction(tx2id);
+    // Member5 confirms tx1 and rejects tx2
+    await multisig.connect(signer5).confirmTransaction(tx1id);
+    await multisig.connect(signer5).rejectTransaction(tx2id);
+    // Member1 executes tx1
+    await multisig.connect(signer1).executeTransaction(tx1id);
+    let tx1 = await multisig.getTransaction(tx1id);
+    expect(tx1.executed).to.equal(true);
+    // Member4 rejects tx2
+    await multisig.connect(signer4).rejectTransaction(tx2id);
+    let tx2 = await multisig.getTransaction(tx2id);
+    expect(tx2.rejected).to.equal(true);
+  });
 });

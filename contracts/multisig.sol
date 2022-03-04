@@ -104,7 +104,7 @@ contract MultiSig {
     // Save id to memory for multiple accesses to save gas
     uint txId = nextTxId;
 
-    Transaction memory _tx = Transaction(msg.sender, _to, amount, 1, 0, false, false);
+    Transaction memory _tx = Transaction(_to, amount, 1, 0, false, false);
     idToTx[txId] = _tx;
     confirmedByMember[txId][msg.sender] = true;
     nextTxId++;
@@ -162,5 +162,9 @@ contract MultiSig {
   function getTransaction(uint _txId) public view returns (Transaction memory) {
     require(_txId < nextTxId, "Transaction does not exist");
     return idToTx[_txId];
+  }
+
+  function getBalance() public view returns (uint) {
+    return address(this).balance / 10 ** 18;
   }
 }

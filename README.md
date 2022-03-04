@@ -1,6 +1,6 @@
-# Basic Sample Hardhat Project
+# Basic multi-sig wallet written in solidity
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+A wallet owned by a group of 5 people. Requires at least 3 out 5 members' consent in order to execute or reject transaction. A member's confirmation to a transaction can be revoked but rejection cannot. Transaction will be rejected automatically when 3 rejections are made, while transaction execution has to be done manually.
 
 Try running some of the following tasks:
 

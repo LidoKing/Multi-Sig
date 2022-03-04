@@ -6,6 +6,10 @@ A wallet owned by a group of 5 people. Requires at least 3 out 5 members' consen
 
 Compiled with v8.8.0 solc
 
+## Front-end
+
+To be added...
+
 ## Functions
 
 ### Create transaction
@@ -60,7 +64,7 @@ Function checks if rejection threshold has been reached at the end of every call
 Transaction execution is done manually. State variable "locked" is changed to true immediately after function is called to prevent re-entrancy, unlocks after transaction has finished.
 
 ```shell
-  bool locked;
+bool locked;
 
 function executeTransaction(uint _txId) onlyOwner enoughConfirmations(_txId) enoughBalance(_txId) hasTx(_txId) external {
   require(!locked, "Re-entrancy detected.");

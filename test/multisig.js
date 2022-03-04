@@ -163,42 +163,39 @@ describe("MultiSig", function () {
     await utils.shouldThrow(multisig.connect(signer1).executeTransaction(id));
   });
 
-  it("should simulate real situation", async () => {
-    const {multisig, signer1, signer2, signer3, signer4, signer5, signer6, addr1, addr2, addr6} = await loadFixture(fixture);
+  it("should reject transaction", async () => {
+    const {multisig, signer1, signer2, signer3, signer4, addr1, addr6} = await loadFixture(fixture);
 
-    // Member1 deposit to contract
-    let amount = await ethers.utils.parseEther("100"); // eth to wei
+    // Deposit to contract
+    let amount = await ethers.utils.parseEther("20"); // eth to wei
     await signer1.sendTransaction({from: addr1, to: multisig.address, value: amount});
+    // Create tx
+    let idBN = await multisig.callStatic.createTransaction(addr6, 10);
+    let id = idBN.toNumber();
+    await multisig.connect(signer1).createTransaction(addr6, 10);
 
-    // Member1 creates tx1
-    let result1 = await multisig.connect(signer1).createTransaction(addr6, 10);
-    let tx1id = result1.value.toNumber();
-    console.log(tx1id);
-    // Member2 confirms tx1
-    await multisig.connect(signer2).confirmTransaction(tx1id);
-    // Member2 creates tx2
-    let result2 = await multisig.connect(signer2).createTransaction(addr2, 50);
-    let tx2id = result2.value.toNumber();
-    console.log(tx2id);
-    // Some random guy (signer6) tries to confirm tx2
-    await utils.shouldThrow(multisig.connect(signer6).confirmTransaction(tx2id));
-    // Member2 revokes tx1
-    await multisig.connect(signer2).revokeConfirmation(tx1id);
-    // Member3 confirms tx1 and rejects tx2
-    await multisig.connect(signer3).confirmTransaction(tx1id);
-    //await multisig.connect(signer3).rejectTransaction(tx2id);
-    //console.log("safe");
-    // Member5 confirms tx1 and rejects tx2
-    await multisig.connect(signer5).confirmTransaction(tx1id);
-    //await multisig.connect(signer5).rejectTransaction(tx2id);
-    console.log("safe");
-    // Member1 executes tx1
-    await multisig.connect(signer1).executeTransaction(tx1id);
-    let tx1 = await multisig.getTransaction(tx1id);
-    expect(tx1.executed).to.equal(true);
-    // Member4 rejects tx2
-    await multisig.connect(signer4).rejectTransaction(tx2id);
-    let tx2 = await multisig.getTransaction(tx2id);
-    expect(tx2.rejected).to.equal(true);
+    // Reject tx
+    await multisig.connect(signer2).rejectTransaction(id);
+    await multisig.connect(signer3).rejectTransaction(id);
+    await multisig.connect(signer4).rejectTransaction(id);
+    let tx = await multisig.getTransaction(id);
+    expect(tx.rejected).to.equal(true);
   });
+
+  it("should not reject twice", async () => {
+    const {multisig, signer1, signer2, addr1, addr6} = await loadFixture(fixture);
+
+    // Deposit to contract
+    let amount = await ethers.utils.parseEther("20"); // eth to wei
+    await signer1.sendTransaction({from: addr1, to: multisig.address, value: amount});
+    // Create tx
+    let idBN = await multisig.callStatic.createTransaction(addr6, 10);
+    let id = idBN.toNumber();
+    await multisig.connect(signer1).createTransaction(addr6, 10);
+
+    // Reject tx
+    await multisig.connect(signer2).rejectTransaction(id);
+    await utils.shouldThrow(multisig.connect(signer2).rejectTransaction(id));
+  });
+
 });

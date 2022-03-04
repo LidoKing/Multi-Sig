@@ -56,8 +56,13 @@ contract MultiSig {
     _;
   }
 
-  modifier hasEnoughConfirmations(uint _txId) {
+  modifier enoughConfirmations(uint _txId) {
     require(idToTx[_txId].confirmations >= requiredConfirmations, "Not enough confirmations.");
+    _;
+  }
+
+  modifier enoughBalance(uint _txId) {
+    require(address(this).balance >= idToTx[_txId].value);
     _;
   }
 
@@ -76,20 +81,19 @@ contract MultiSig {
 
   // Receive ether
   receive() external payable {
-    emit DepositReceived(address(this).balance);
+    emit DepositReceived(msg.value);
   }
 
   fallback() external payable {
-    emit DepositReceived(address(this).balance);
+    emit DepositReceived(msg.value);
   }
 
   function createTransaction(address _to, uint _value) onlyOwner external returns (uint) {
-    uint contractBalance = address(this).balance;
-    require(contractBalance / 10 ** 18 >= _value, "Not enough money in wallet.");
+    uint amount = _value * 10 ** 18; // to wei
     // Save id to memory for multiple accesses to save gas
     uint txId = nextTxId;
 
-    Transaction memory _tx = Transaction(msg.sender, _to, _value, 1, false);
+    Transaction memory _tx = Transaction(msg.sender, _to, amount, 1, false);
     idToTx[txId] = _tx;
     confirmedByMember[txId][msg.sender] = true;
     nextTxId++;
@@ -107,18 +111,17 @@ contract MultiSig {
     emit TransactionConfirmed(_txId, msg.sender, _tx.confirmations);
   }
 
-  function executeTransaction(uint _txId) onlyOwner hasEnoughConfirmations(_txId) external {
+  function executeTransaction(uint _txId) onlyOwner enoughConfirmations(_txId) enoughBalance(_txId) external {
     require(!locked, "Re-entrancy detected.");
     locked = true;
     Transaction storage _tx = idToTx[_txId];
-    address receiver = _tx.to;
-    uint amount = _tx.value;
-    (bool status, ) = receiver.call{value: amount * 10 ** 18}("");
+    address recepient = _tx.to;
+    (bool status, ) = recepient.call{value: _tx.value}("");
     require(status, "Transaction failed.");
     _tx.executed = true;
+    locked = false;
 
     emit TransactionExecuted(_txId);
-    locked = false;
   }
 
   function revokeConfirmation(uint _txId) onlyOwner inProgress(_txId) confirmed(_txId) external {

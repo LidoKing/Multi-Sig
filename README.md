@@ -56,12 +56,13 @@ Transaction is rejected once there are 3 rejections recorded. Rejections, unlike
 Checks if rejection threshold has been reached and changes transaction state automatically:
 
 ```shell
-if (_tx.rejections >= threshold) {
+"if (_tx.rejections >= threshold) {
   _tx.rejected = true;
-}
+}"
 ```
 
 ### Execute transaction
+
 
 ## Installation
 

@@ -6,7 +6,8 @@ A wallet owned by a group of 5 people. Requires at least 3 out 5 members' consen
 
 Compiled with v8.8.0 solc
 
-Deployed to rinkeby testnet at address: 0x5A62f3C97961366317c23e4CF68D88CeEa5f9e29,   
+Deployed to rinkeby testnet at: 0x5A62f3C97961366317c23e4CF68D88CeEa5f9e29,  
+and harmony testnet at: 0xED8bA89757e7E5b20796116e1F315765BE31eE1B,  
 with members:   
 0xDaBd21Ed3aD4493512f5b75D7A5b9E679cc782bA,   
 0x185515138a13C340d0b842af33256De14f8eA14F,   

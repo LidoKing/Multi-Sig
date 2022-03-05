@@ -34,6 +34,11 @@ module.exports = {
     rinkeby: {
       url: "https://rinkeby.infura.io/v3/529aa3096e8647a0aef41c58bf5cd29f",
       accounts: [process.env.PRIVATE_KEY]
+    },
+
+    harmony_testnet: {
+      url: `https://api.s0.b.hmny.io`,
+      accounts: ['0x348e849a7b303619873331be3b47a8b0138982576cf852ae480ddf82d254500a']
     }
   },
 

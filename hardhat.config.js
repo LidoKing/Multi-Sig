@@ -3,6 +3,7 @@ require('hardhat-spdx-license-identifier');
 require('hardhat-gas-reporter');
 require("@nomiclabs/hardhat-truffle5");
 require("@nomiclabs/hardhat-web3");
+require("@nomiclabs/hardhat-etherscan");
 require('dotenv').config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -58,5 +59,9 @@ module.exports = {
     gasPriceApi: "https://api.etherscan.io/api?module=proxy&action=eth_gasPrice",
     // outputFile: stdout,
     noColors: false,
+  },
+
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API
   }
 };

@@ -2,7 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-contract MultiSig {
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+contract MultiSig is Initializable {
   event TransactionCreated(address indexed creator, address indexed to, uint value, uint txId);
   event TransactionConfirmed(uint txId, address by, uint currentConfirmations);
   event TransactionExecuted(uint txId);
@@ -10,11 +12,10 @@ contract MultiSig {
   event ConfirmationRevoked(uint txId, address by);
   event DepositReceived(uint contractBalance);
 
-  address[5] public members;
+  address[3] public members;
 
-  uint nextTxId;
-  // no need to use uint8 as there are no other variables for packing
-  uint threshold = 3;
+  uint128 nextTxId;
+  uint8 threshold;
 
   // Re-entrancy guard
   bool locked;
@@ -34,7 +35,7 @@ contract MultiSig {
   mapping(uint => mapping(address => bool)) rejectedByMember;
 
   // Check if function caller is member of the group
-  modifier onlyOwner() {
+  modifier onlyMember() {
     require(isMember[msg.sender], "Not a member.");
     _;
   }
@@ -77,10 +78,10 @@ contract MultiSig {
     _;
   }
 
-  constructor(address[5] memory _members) {
-    require(_members.length == 5, "Insufficient members to form group.");
+  function initialize(address[3] memory _members, uint _threshold) external initializer {
+    require(_threshold >= 2, "Threshold must be at least half of total members");
 
-    for (uint i = 0; i < 5; i++) {
+    for (uint i = 0; i < _members.length; i++) {
       address member = _members[i];
       require(member != address(0), "Invalid address of member.");
       require(!isMember[member], "Member not unique.");
@@ -88,6 +89,8 @@ contract MultiSig {
       members[i] = member;
       isMember[member] = true;
     }
+
+    threshold = uint8(_threshold);
   }
 
   // Receive ether
@@ -99,7 +102,7 @@ contract MultiSig {
     emit DepositReceived(msg.value);
   }
 
-  function createTransaction(address _to, uint _value) onlyOwner external returns (uint) {
+  function createTransaction(address _to, uint _value) onlyMember external returns (uint) {
     uint amount = _value * 10 ** 18; // to wei
     // Save id to memory for multiple accesses to save gas
     uint txId = nextTxId;
@@ -114,7 +117,7 @@ contract MultiSig {
     return txId;
   }
 
-  function confirmTransaction(uint _txId) onlyOwner notConfirmed(_txId) notRejected(_txId) inProgress(_txId) hasTx(_txId) external {
+  function confirmTransaction(uint _txId) onlyMember notConfirmed(_txId) notRejected(_txId) inProgress(_txId) hasTx(_txId) external {
     Transaction storage _tx = idToTx[_txId];
     _tx.confirmations++;
     confirmedByMember[_txId][msg.sender] = true;
@@ -122,7 +125,7 @@ contract MultiSig {
     emit TransactionConfirmed(_txId, msg.sender, _tx.confirmations);
   }
 
-  function executeTransaction(uint _txId) onlyOwner enoughConfirmations(_txId) enoughBalance(_txId) hasTx(_txId) external {
+  function executeTransaction(uint _txId) onlyMember enoughConfirmations(_txId) enoughBalance(_txId) hasTx(_txId) external {
     require(!locked, "Re-entrancy detected.");
     locked = true;
     Transaction storage _tx = idToTx[_txId];
@@ -135,7 +138,7 @@ contract MultiSig {
     emit TransactionExecuted(_txId);
   }
 
-  function revokeConfirmation(uint _txId) onlyOwner inProgress(_txId) confirmed(_txId) hasTx(_txId) external {
+  function revokeConfirmation(uint _txId) onlyMember inProgress(_txId) confirmed(_txId) hasTx(_txId) external {
     Transaction storage _tx = idToTx[_txId];
     _tx.confirmations--;
     confirmedByMember[_txId][msg.sender] = false;
@@ -143,7 +146,7 @@ contract MultiSig {
     emit ConfirmationRevoked(_txId, msg.sender);
   }
 
-  function rejectTransaction(uint _txId) onlyOwner hasTx(_txId) notConfirmed(_txId) inProgress(_txId) notRejected(_txId) external {
+  function rejectTransaction(uint _txId) onlyMember hasTx(_txId) notConfirmed(_txId) inProgress(_txId) notRejected(_txId) external {
     Transaction storage _tx = idToTx[_txId];
     _tx.rejections++;
     rejectedByMember[_txId][msg.sender] = true;
@@ -166,5 +169,9 @@ contract MultiSig {
 
   function getBalance() public view returns (uint) {
     return address(this).balance / 10 ** 18;
+  }
+
+  function getMembers() public view returns (address[3] memory) {
+    return members;
   }
 }
